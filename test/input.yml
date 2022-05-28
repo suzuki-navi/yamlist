@@ -3,3 +3,7 @@ vartest:
   $a: あ
   a: $a
   =$a: 가
+
+iftest1: $if(true, aaa, bbb)
+iftest2: $if(false, aaa)
+

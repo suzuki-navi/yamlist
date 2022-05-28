@@ -5,6 +5,7 @@ import jinja2.meta
 
 from yamlist import calculator
 from yamlist import expr
+from yamlist import yamast
 
 class EvaluatingStr(expr.EvaluatingExpr):
     def __init__(self, expr, bindings):
@@ -43,5 +44,9 @@ def value_to_string(value):
     return json.dumps(value)
 
 def evaluate_reference(expr_str, bindings):
-    return calculator.evaluate_final(calculator.get_from_bindings(bindings, expr_str))
+    try:
+        ast = yamast.parser.parse_string(expr_str, parse_all=True)[0]
+    except pp.ParseException as err:
+        return str(err)
+    return yamast.evaluate_ast(ast, bindings)
 
