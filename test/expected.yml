@@ -19,3 +19,6 @@ asttest2:
   a2: true
 maptest:
   a1: fooHellobar
+  a2:
+  - fooaabar
+  - foobbbar

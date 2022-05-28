@@ -89,10 +89,15 @@ def evaluate_ast(ast, bindings):
     elif funcname == "not":
         if len(args) >= 1:
             return evaluate_not(args[0], bindings)
+    elif funcname == "map":
+        if len(args) >= 2:
+            return evaluate_map(args[0], args[1], bindings)
 
     if calculator.exists_in_bindings(bindings, funcname):
         funcvalue = calculator.evaluate_final(calculator.get_from_bindings(bindings, funcname))
         if not isinstance(funcvalue, userfunc.UserFunction):
+            return funcvalue
+        if len(args) == 0:
             return funcvalue
         return funcvalue.call_apply(args)
     else:
@@ -177,6 +182,19 @@ def evaluate_equal(arg1, arg2, bindings, flag):
 def evaluate_not(arg, bindings):
     arg_result = ast_to_boolean(arg, bindings)
     return not arg_result
+
+def evaluate_map(arg1, arg2, bindings):
+    arg1_result = calculator.evaluate_final(evaluate_ast(arg1, bindings))
+    arg2_result = calculator.evaluate_final(evaluate_ast(arg2, bindings))
+    if not isinstance(arg1_result, list):
+        return None
+    result = []
+    for elem in arg1_result:
+        if not isinstance(arg2_result, userfunc.UserFunction):
+            result.append(None)
+            continue
+        result.append(calculator.evaluate_final(arg2_result.call_apply([elem])))
+    return result
 
 def ast_to_boolean(cond, bindings):
     result = calculator.evaluate_final(evaluate_ast(cond, bindings))

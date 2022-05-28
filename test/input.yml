@@ -50,4 +50,5 @@ maptest:
     $s: $param
     $_: foo{{s}}bar
   a1: $func("Hello")
+  a2: $map(targets, func)
 
