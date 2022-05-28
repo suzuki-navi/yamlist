@@ -3,6 +3,7 @@ import json
 from yamlist import calculator
 from yamlist import expr
 from yamlist import strexpr
+from yamlist import userfunc
 
 class EvaluatingDict(expr.EvaluatingExpr):
     def __init__(self, expr, bindings):
@@ -30,13 +31,13 @@ class EvaluatingDict(expr.EvaluatingExpr):
         if len(params) == 0:
             self.prepared = self.prepare_dict()
         else:
-            self.prepared = self.prepare_func() # TODO
+            self.prepared = self.prepare_func(params)
         return self.prepared
 
     def prepare_dict(self):
         if "$_" in self.expr:
             return calculator.evaluate_final(calculator.buildEvaluating(self.expr["$_"], self.bindings2))
-        dst = {}
+        body = {}
         for key, elem in self.expr.items():
             if key.startswith("$$"):
                 key = key[1:]
@@ -46,8 +47,23 @@ class EvaluatingDict(expr.EvaluatingExpr):
                 key_name_value = calculator.evaluate_final(calculator.buildEvaluating(key[1:], self.bindings2))
                 key = strexpr.value_to_string(key_name_value)
             if key is not None:
-                dst[key] = calculator.buildEvaluating(elem, self.bindings2)
-        return dst
+                body[key] = calculator.buildEvaluating(elem, self.bindings2)
+        return body
+
+    def prepare_func(self, params):
+        body = self.prepare_func_body()
+        return userfunc.UserFunction(body, params, self.bindings)
+
+    def prepare_func_body(self):
+        if "$_" in self.expr:
+            return self.expr["$_"]
+        body = {}
+        for key, elem in self.expr.items():
+            if key.startswith("$") and not key.startswith("$$") and key != "$_":
+                if elem == "$param":
+                    continue
+            body[key] = elem
+        return body
 
     def get_consts(self):
         consts = {}

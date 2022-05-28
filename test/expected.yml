@@ -17,3 +17,5 @@ asttest1:
 asttest2:
   a1: false
   a2: true
+maptest:
+  a1: fooHellobar

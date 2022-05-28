@@ -41,3 +41,13 @@ asttest2:
   $foo: Hello
   a1: $foo == "dummy"
   a2: $foo == "Hello"
+
+maptest:
+  $targets:
+    - aa
+    - bb
+  $func:
+    $s: $param
+    $_: foo{{s}}bar
+  a1: $func("Hello")
+

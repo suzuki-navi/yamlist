@@ -2,6 +2,7 @@
 import pyparsing as pp
 
 from yamlist import calculator
+from yamlist import userfunc
 
 def evaluate_reference(expr_str, bindings):
     try:
@@ -76,6 +77,9 @@ def evaluate_ast(ast, bindings):
         return evaluate_else(bindings)
     elif funcname == "endif":
         return evaluate_endif(bindings)
+    elif funcname == "flatten":
+        if len(args) >= 1:
+            return evaluate_flatten(args[0], bindings)
     elif funcname == "equal":
         if len(args) >= 2:
             return evaluate_equal(args[0], args[1], bindings, True)
@@ -87,8 +91,10 @@ def evaluate_ast(ast, bindings):
             return evaluate_not(args[0], bindings)
 
     if calculator.exists_in_bindings(bindings, funcname):
-        return calculator.get_from_bindings(bindings, funcname)
-        # TODO 関数だった場合の対応
+        funcvalue = calculator.evaluate_final(calculator.get_from_bindings(bindings, funcname))
+        if not isinstance(funcvalue, userfunc.UserFunction):
+            return funcvalue
+        return funcvalue.call_apply(args)
     else:
         return funcname
 
@@ -149,6 +155,12 @@ def evaluate_endif(bindings):
         stack_if2.pop()
         return stack_if2
     return calculator.CondStackOperationValue(operate_stack_endif)
+
+def evaluate_flatten(arg, bindings):
+    arg_result = calculator.evaluate_final(evaluate_ast(arg, bindings))
+    if isinstance(arg_result, list):
+        return calculator.ListInListValue(arg_result)
+    return arg_result
 
 def evaluate_equal(arg1, arg2, bindings, flag):
     arg1_result = calculator.evaluate_final(evaluate_ast(arg1, bindings))
