@@ -6,6 +6,7 @@ def calc(src, config):
 
     bindings["null"] = None
     bindings["true"] = True
+    bindings["debug"] = True
     bindings["false"] = False
     bindings["empty"] = NoElementValue()
 
@@ -48,7 +49,7 @@ def exists_in_bindings(bindings, name):
     if name is None:
         return True
 
-    if isinstance(bindings, EvaluatingExpr):
+    if isinstance(bindings, expr.EvaluatingExpr):
         return bindings.exists_name(name)
 
     if not isinstance(bindings, dict):
@@ -64,7 +65,7 @@ def get_from_bindings(bindings, name):
     if name is None:
         return bindings
 
-    if isinstance(bindings, EvaluatingExpr):
+    if isinstance(bindings, expr.EvaluatingExpr):
         return bindings.get_by_name(name)
 
     if not isinstance(bindings, dict):
