@@ -1,5 +1,4 @@
 hello: Hello, World!
 vartest:
-  $a: あ
-  a: $a
-  =$a: 가
+  a: あ
+  あ: 가

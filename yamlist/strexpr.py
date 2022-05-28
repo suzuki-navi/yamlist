@@ -17,8 +17,8 @@ class EvaluatingStr(expr.EvaluatingExpr):
         src = self.expr
         if src.startswith("$$"):
             return self.render_template(src[1:])
-        #elif src.startswith("$"):
-        #    return evaluate_func_call_str([], src[1:], {}, self.bindings)
+        elif src.startswith("$"):
+            return evaluate_reference(src[1:], self.bindings)
         else:
             return self.render_template(src)
 
@@ -41,4 +41,7 @@ def value_to_string(value):
     if isinstance(value, str):
         return value
     return json.dumps(value)
+
+def evaluate_reference(expr_str, bindings):
+    return calculator.evaluate_final(calculator.get_from_bindings(bindings, expr_str))
 

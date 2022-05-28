@@ -5,6 +5,7 @@ import jinja2.meta
 
 from yamlist import calculator
 from yamlist import expr
+from yamlist import strexpr
 
 class EvaluatingDict(expr.EvaluatingExpr):
     def __init__(self, expr, bindings):
