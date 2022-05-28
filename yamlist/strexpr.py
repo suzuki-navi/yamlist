@@ -24,7 +24,7 @@ class EvaluatingStr(expr.EvaluatingExpr):
             return self.render_template(src)
 
     def render_template(self, src):
-        env = jinja2.Environment(keep_trailing_newline=True)
+        env = jinja2.Environment(keep_trailing_newline=True, trim_blocks=True)
         ast = env.parse(src)
         var_names = []
         var_names.extend(jinja2.meta.find_undeclared_variables(ast))
@@ -34,7 +34,7 @@ class EvaluatingStr(expr.EvaluatingExpr):
                 v = calculator.evaluate_final(calculator.get_from_bindings(self.bindings, name))
             else:
                 v = "ERROR"
-            vars2[name] = value_to_string(calculator.value_to_single(v))
+            vars2[name] = calculator.value_to_single(v)
         result = env.from_string(src).render(vars2)
         return result
 

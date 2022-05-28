@@ -170,6 +170,8 @@ def ast_to_boolean(cond, bindings):
     result = calculator.evaluate_final(evaluate_ast(cond, bindings))
     if result == False:
         return False
+    if result == None:
+        return False
     if result == "":
         return False
     if result == 0:

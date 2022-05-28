@@ -7,7 +7,6 @@ from yamlist import strexpr
 class EvaluatingDict(expr.EvaluatingExpr):
     def __init__(self, expr, bindings):
         super().__init__(expr, bindings)
-        self.bindings2 = bindings.copy()
         self.prepared = None
 
     def fetch(self):
@@ -24,6 +23,7 @@ class EvaluatingDict(expr.EvaluatingExpr):
     def prepare(self):
         if self.prepared is not None:
             return self.prepared
+        self.bindings2 = self.bindings.copy()
         for key, expr in self.get_consts().items():
             self.bindings2[key] = expr
         params = self.get_params()

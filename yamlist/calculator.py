@@ -17,8 +17,7 @@ def calc(src, config):
 
     result = evaluate_final(buildEvaluating(src, bindings))
     result = value_to_single(result)
-    return result
-
+    return deepcopy(result) # YAML出力時に同じオブジェクトが複数出現するときの参照表示を回避するため
 
 class NoElementValue:
     pass
@@ -95,4 +94,20 @@ def parse_name(name):
         return (name, None)
     else:
         return (name[0:p], name[p+1:])
+
+# srcをコピー
+# 同じオブジェクトを複数から参照参照している場合にそれぞれにコピー
+# copy.deepcopy では複数参照を解消しないため
+def deepcopy(src):
+    if isinstance(src, dict):
+        dst = {}
+        for key, value in src.items():
+            dst[key] = deepcopy(value)
+    elif isinstance(src, list):
+        dst = []
+        for elem in src:
+            dst.append(deepcopy(elem))
+    else:
+        dst = src
+    return dst
 
