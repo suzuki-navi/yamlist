@@ -3,8 +3,16 @@ import pyparsing as pp
 
 from yamlist import calculator
 
+def evaluate_reference(expr_str, bindings):
+    try:
+        ast = parser.parse_string(expr_str, parse_all=True)[0]
+    except pp.ParseException as err:
+        return str(err)
+    return evaluate_ast(ast, bindings)
+
 def create_pp_expr():
     word = pp.Word(pp.alphanums + "_")
+    lit_str = pp.QuotedString(quoteChar='"', escChar='\\', escQuote='\\"')
 
     expr = pp.Forward()
 
@@ -21,7 +29,7 @@ def create_pp_expr():
                 i = i + 2
             return [[ss[0], args]]
 
-    funccall = (word + pp.Opt("(" + exprs + ")")).setParseAction(funccall_action)
+    funccall = lit_str | (word + pp.Opt("(" + exprs + ")")).setParseAction(funccall_action)
 
     def equal_expr_action(ss):
         if len(ss) == 1:
@@ -33,7 +41,15 @@ def create_pp_expr():
 
     equal_expr = (funccall + pp.Opt(pp.oneOf("== !=") + funccall)).setParseAction(equal_expr_action)
 
-    expr << equal_expr
+    def not_expr_action(ss):
+        if len(ss) == 1:
+            return [ss[0]]
+        else:
+            return [["not", [ss[1]]]]
+
+    not_expr = (pp.Opt("not") + equal_expr).setParseAction(not_expr_action)
+
+    expr << not_expr
 
     return expr
 
@@ -60,6 +76,15 @@ def evaluate_ast(ast, bindings):
         return evaluate_else(bindings)
     elif funcname == "endif":
         return evaluate_endif(bindings)
+    elif funcname == "equal":
+        if len(args) >= 2:
+            return evaluate_equal(args[0], args[1], bindings, True)
+    elif funcname == "not_equal":
+        if len(args) >= 2:
+            return evaluate_equal(args[0], args[1], bindings, False)
+    elif funcname == "not":
+        if len(args) >= 1:
+            return evaluate_not(args[0], bindings)
 
     if calculator.exists_in_bindings(bindings, funcname):
         return calculator.get_from_bindings(bindings, funcname)
@@ -124,6 +149,22 @@ def evaluate_endif(bindings):
         stack_if2.pop()
         return stack_if2
     return calculator.CondStackOperationValue(operate_stack_endif)
+
+def evaluate_equal(arg1, arg2, bindings, flag):
+    arg1_result = calculator.evaluate_final(evaluate_ast(arg1, bindings))
+    arg2_result = calculator.evaluate_final(evaluate_ast(arg2, bindings))
+    if arg1_result == arg2_result:
+        ret = True
+    else:
+        ret = False
+    if flag:
+        return ret
+    else:
+        return not ret
+
+def evaluate_not(arg, bindings):
+    arg_result = ast_to_boolean(arg, bindings)
+    return not arg_result
 
 def ast_to_boolean(cond, bindings):
     result = calculator.evaluate_final(evaluate_ast(cond, bindings))

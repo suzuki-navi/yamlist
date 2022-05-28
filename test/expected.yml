@@ -10,3 +10,10 @@ listtest1:
 - c1
 - c4
 - c6
+asttest1:
+  a1: true
+  a2: false
+  a3: false
+asttest2:
+  a1: false
+  a2: true

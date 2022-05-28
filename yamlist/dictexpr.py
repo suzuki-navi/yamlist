@@ -12,6 +12,8 @@ class EvaluatingDict(expr.EvaluatingExpr):
 
     def fetch(self):
         prepared = self.prepare()
+        if not isinstance(prepared, dict):
+            return calculator.evaluate_final(prepared)
         dst = {}
         for key, elem in prepared.items():
             r = calculator.evaluate_final(elem)
@@ -33,7 +35,7 @@ class EvaluatingDict(expr.EvaluatingExpr):
 
     def prepare_dict(self):
         if "$_" in self.expr:
-            return calculator.buildEvaluating(src["$_"], self.bindings2)
+            return calculator.evaluate_final(calculator.buildEvaluating(self.expr["$_"], self.bindings2))
         dst = {}
         for key, elem in self.expr.items():
             if key.startswith("$$"):
@@ -65,6 +67,8 @@ class EvaluatingDict(expr.EvaluatingExpr):
 
     def exists_name(self, name):
         prepared = self.prepare()
+        if not isinstance(prepared, dict):
+            return False
         n1, n2 = parse_name(name)
         if n1 in prepared:
             return calculator.exists_in_bindings(prepared[n1], n2)
@@ -73,9 +77,11 @@ class EvaluatingDict(expr.EvaluatingExpr):
 
     def get_by_name(self, name):
         prepared = self.prepare()
+        if not isinstance(prepared, dict):
+            return None
         n1, n2 = parse_name(name)
         if n1 in prepared:
             return calculator.get_from_bindings(prepared[n1], n2)
         else:
-            return False
+            return None
 

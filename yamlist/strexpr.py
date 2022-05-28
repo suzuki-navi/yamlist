@@ -19,7 +19,7 @@ class EvaluatingStr(expr.EvaluatingExpr):
         if src.startswith("$$"):
             return self.render_template(src[1:])
         elif src.startswith("$"):
-            return evaluate_reference(src[1:], self.bindings)
+            return yamast.evaluate_reference(src[1:], self.bindings)
         else:
             return self.render_template(src)
 
@@ -42,11 +42,4 @@ def value_to_string(value):
     if isinstance(value, str):
         return value
     return json.dumps(value)
-
-def evaluate_reference(expr_str, bindings):
-    try:
-        ast = yamast.parser.parse_string(expr_str, parse_all=True)[0]
-    except pp.ParseException as err:
-        return str(err)
-    return yamast.evaluate_ast(ast, bindings)
 
