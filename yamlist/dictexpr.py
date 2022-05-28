@@ -1,8 +1,5 @@
 import json
 
-import jinja2
-import jinja2.meta
-
 from yamlist import calculator
 from yamlist import expr
 from yamlist import strexpr

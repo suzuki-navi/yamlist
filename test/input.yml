@@ -7,3 +7,27 @@ vartest:
 iftest1: $if(true, aaa, bbb)
 iftest2: $if(false, aaa)
 
+listtest1:
+- 11
+- 22
+- $if(true, aaa, bbb)
+- $if(false, aaa)
+- $if(true)
+- c1
+- $else
+- c2
+- $endif
+- $if(false)
+- c3
+- $else
+- c4
+- $endif
+- $if(false)
+- c5
+- $elif(true)
+- c6
+- $elif(true)
+- c7
+- $else
+- c8
+- $endif

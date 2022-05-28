@@ -34,7 +34,7 @@ class EvaluatingStr(expr.EvaluatingExpr):
                 v = calculator.evaluate_final(calculator.get_from_bindings(self.bindings, name))
             else:
                 v = "ERROR"
-            vars2[name] = value_to_string(v)
+            vars2[name] = value_to_string(calculator.value_to_single(v))
         result = env.from_string(src).render(vars2)
         return result
 

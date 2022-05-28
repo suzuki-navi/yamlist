@@ -3,3 +3,10 @@ vartest:
   a: あ
   あ: 가
 iftest1: aaa
+listtest1:
+- 11
+- 22
+- aaa
+- c1
+- c4
+- c6

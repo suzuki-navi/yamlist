@@ -1,6 +1,7 @@
 from yamlist import expr
 from yamlist import strexpr
 from yamlist import dictexpr
+from yamlist import listexpr
 
 def calc(src, config):
     bindings = {}
@@ -22,13 +23,21 @@ def calc(src, config):
 class NoElementValue:
     pass
 
+class ListInListValue:
+    def __init__(self, items):
+        self.items = items
+
+class CondStackOperationValue:
+    def __init__(self, operation):
+        self.operation = operation
+
 def buildEvaluating(expr, bindings):
     if isinstance(expr, str):
         return strexpr.EvaluatingStr(expr, bindings)
     elif isinstance(expr, dict):
         return dictexpr.EvaluatingDict(expr, bindings)
-    #elif isinstance(expr, list):
-    #    return EvaluatingList(expr, bindings)
+    elif isinstance(expr, list):
+        return listexpr.EvaluatingList(expr, bindings)
     else:
         return expr
 
@@ -41,8 +50,10 @@ def evaluate_final(src):
 def value_to_single(obj):
     if isinstance(obj, NoElementValue):
         return None
-    #elif isinstance(obj, ListInListValue):
-    #    return obj.items
+    elif isinstance(obj, ListInListValue):
+        return obj.items
+    elif isinstance(obj, CondStackOperationValue):
+        return "ERROR"
     else:
         return obj
 

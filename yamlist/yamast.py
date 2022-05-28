@@ -41,20 +41,38 @@ parser = create_pp_expr()
 
 def evaluate_ast(ast, bindings):
     if isinstance(ast, str):
-        if calculator.exists_in_bindings(bindings, ast):
-            return calculator.get_from_bindings(bindings, ast)
-        else:
-            return ast
-    funcname = ast[0]
-    args = ast[1]
+        funcname = ast
+        args = []
+    else:
+        funcname = ast[0]
+        args = ast[1]
     if funcname == "if":
         if len(args) >= 3:
             return evaluate_if3(args[0], args[1], args[2], bindings)
-        if len(args) >= 2:
+        elif len(args) >= 2:
             return evaluate_if2(args[0], args[1], bindings)
+        elif len(args) >= 1:
+            return evaluate_if1(args[0], bindings)
+    elif funcname == "elif":
+        if len(args) >= 1:
+            return evaluate_elif(args[0], bindings)
+    elif funcname == "else":
+        return evaluate_else(bindings)
+    elif funcname == "endif":
+        return evaluate_endif(bindings)
 
-    return funcname # TODO
-    #return calculator.evaluate_final(calculator.get_from_bindings(bindings, expr_str))
+    if calculator.exists_in_bindings(bindings, funcname):
+        return calculator.get_from_bindings(bindings, funcname)
+        # TODO 関数だった場合の対応
+    else:
+        return funcname
+
+def evaluate_if3(cond, then_expr, else_expr, bindings):
+    cond_result = ast_to_boolean(cond, bindings)
+    if cond_result:
+        return evaluate_ast(then_expr, bindings)
+    else:
+        return evaluate_ast(else_expr, bindings)
 
 def evaluate_if2(cond, then_expr, bindings):
     cond_result = ast_to_boolean(cond, bindings)
@@ -63,12 +81,49 @@ def evaluate_if2(cond, then_expr, bindings):
     else:
         return calculator.NoElementValue()
 
-def evaluate_if3(cond, then_expr, else_expr, bindings):
+def evaluate_if1(cond, bindings):
     cond_result = ast_to_boolean(cond, bindings)
-    if cond_result:
-        return evaluate_ast(then_expr, bindings)
-    else:
-        return evaluate_ast(else_expr, bindings)
+    def operate_stack_if(stack_if):
+        stack_if2 = stack_if.copy()
+        if cond_result:
+            stack_if2.append(1)
+        else:
+            stack_if2.append(0)
+        return stack_if2
+    return calculator.CondStackOperationValue(operate_stack_if)
+
+def evaluate_elif(cond, bindings):
+    cond_result = ast_to_boolean(cond, bindings)
+    def operate_stack_elif(stack_if):
+        stack_if2 = stack_if.copy()
+        c = stack_if2.pop()
+        if c == 0:
+            if cond_result:
+                stack_if2.append(1)
+            else:
+                stack_if2.append(0)
+        else:
+            stack_if2.append(-1)
+        return stack_if2
+    return calculator.CondStackOperationValue(operate_stack_elif)
+
+def evaluate_else(bindings):
+    def operate_stack_else(stack_if):
+        stack_if2 = stack_if.copy()
+        c = stack_if2.pop()
+        if c == 0:
+            stack_if2.append(1)
+        else:
+            stack_if2.append(0)
+        return stack_if2
+    return calculator.CondStackOperationValue(operate_stack_else)
+
+def evaluate_endif(bindings):
+    def operate_stack_endif(stack_if):
+        stack_if2 = stack_if.copy()
+        stack_if2.pop()
+        return stack_if2
+    return calculator.CondStackOperationValue(operate_stack_endif)
 
 def ast_to_boolean(cond, bindings):
     result = calculator.evaluate_final(evaluate_ast(cond, bindings))
