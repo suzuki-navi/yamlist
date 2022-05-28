@@ -1,5 +1,6 @@
 from yamlist import expr
 from yamlist import strexpr
+from yamlist import dictexpr
 
 def calc(src, config):
     bindings = {}
@@ -14,7 +15,7 @@ def calc(src, config):
         bindings[key] = value
 
     result = evaluate_final(buildEvaluating(src, bindings))
-    result = value_flatten(result)
+    result = value_to_single(result)
     return result
 
 
@@ -24,8 +25,8 @@ class NoElementValue:
 def buildEvaluating(expr, bindings):
     if isinstance(expr, str):
         return strexpr.EvaluatingStr(expr, bindings)
-    #elif isinstance(expr, dict):
-    #    return EvaluatingDict(expr, bindings)
+    elif isinstance(expr, dict):
+        return dictexpr.EvaluatingDict(expr, bindings)
     #elif isinstance(expr, list):
     #    return EvaluatingList(expr, bindings)
     else:
@@ -37,7 +38,7 @@ def evaluate_final(src):
             return src
         src = src.evaluate()
 
-def value_flatten(obj):
+def value_to_single(obj):
     if isinstance(obj, NoElementValue):
         return None
     #elif isinstance(obj, ListInListValue):
